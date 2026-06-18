@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+langgraph
+langchain-google-genai
+langchain-community
+chromadb
+pydantic
+tavily-python
+pypdf
+pdfplumber
