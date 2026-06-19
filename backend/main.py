@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -18,10 +21,14 @@ app.add_middleware(
 class LegalRequest(BaseModel):
     query: str
 
+class ChatRequest(BaseModel):
+    query: str
+    language: str = None
+
 @app.on_event("startup")
 def startup_event():
-    """Triggers automated pipeline reading of your PDF collection on backend deployment boot."""
-    initialize_vector_db()
+    """Startup event hook for the FastAPI backend server."""
+    print("LegalOps Core Engine API server started successfully.")
 
 @app.post("/api/query-legal-ops")
 async def process_legal_ops(payload: LegalRequest):
@@ -45,7 +52,28 @@ async def process_legal_ops(payload: LegalRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/chat")
+async def chat_legal_ops(payload: ChatRequest):
+    if not payload.query.strip():
+        raise HTTPException(status_code=400, detail="Query string parameter empty.")
+    try:
+        execution_input = {
+            "raw_query": payload.query,
+            "language": payload.language or "en",
+            "constitutional_data": "",
+            "web_data": "",
+            "compiled_english_advice": "",
+            "final_localized_response": ""
+        }
+        output = legal_ops_graph.invoke(execution_input)
+        return {
+            "language": output.get("language"),
+            "response": output.get("final_localized_response")
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
-    import uvicorn
-    # Boots up the thread loop listener locally on port 8000
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    print("Initializing and compiling the Local Vector Database...")
+    initialize_vector_db()
+    print("Database initialization task completed successfully.")

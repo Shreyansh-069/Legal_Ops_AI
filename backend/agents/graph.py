@@ -1,6 +1,6 @@
 from typing import TypedDict, List
 from langgraph.graph import StateGraph, START, END
-from agents.translator import detect_language, translate_text
+from agents.translator import detect_language, translate_text, extract_text
 from agents.legal_finder import search_constitutional_acts
 from agents.web_search import lookup_live_precedents
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -14,7 +14,17 @@ class LegalState(TypedDict):
     compiled_english_advice: str
     final_localized_response: str
 
-llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0.3)
+_llm = None
+
+def get_llm():
+    global _llm
+    if _llm is None:
+        import os
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            raise ValueError("GOOGLE_API_KEY is missing from environment. Please add it to your .env file.")
+        _llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0.3, google_api_key=api_key)
+    return _llm
 
 def routing_node(state: LegalState):
     lang = detect_language(state["raw_query"])
@@ -40,8 +50,9 @@ def synthesis_node(state: LegalState):
     2. STATUTORY COMPLIANCE (Relevant IPC/BNS sections or Bare Act clauses mapped out)
     3. RECOMMENDED STRATEGY (Actionable legal recourses, police filing tips, or legal notice paths)
     """
+    llm = get_llm()
     response = llm.invoke(prompt)
-    return {"compiled_english_advice": response.content.strip()}
+    return {"compiled_english_advice": extract_text(response.content).strip()}
 
 def final_localization_node(state: LegalState):
     localized = translate_text(state["compiled_english_advice"], state["language"])
