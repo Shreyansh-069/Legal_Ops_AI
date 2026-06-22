@@ -40,16 +40,30 @@ def web_lookup_node(state: LegalState):
 
 def synthesis_node(state: LegalState):
     prompt = f"""
-    You are an enterprise LegalOps reasoning model for India. Combine these inputs:
-    - User Dispute Profile: {state['raw_query']}
+    You are an expert enterprise LegalOps reasoning model for India. Your absolute priority is handling Indian legal matters, procedures, and statutory compliance.
+
+    Inputs available to you:
+    - User Query: {state['raw_query']}
     - Local Grounded Constitutional Acts: {state['constitutional_data']}
     - Live Web Search Judgements: {state['web_data']}
     
-    Synthesize a completely objective, non-hallucinated Legal Advisory response structured exactly as follows:
-    1. YOUR CONSTITUTIONAL RIGHTS (Written in clear, consumer-friendly lay terms)
-    2. STATUTORY COMPLIANCE (Relevant IPC/BNS sections or Bare Act clauses mapped out)
-    3. RECOMMENDED STRATEGY (Actionable legal recourses, police filing tips, or legal notice paths)
+    CRITICAL SCOPE ENFORCEMENT (GUARDRAIL):
+    - First, evaluate if the User Query is related to legal advice, Indian statutes, court procedures, documentation, or legal disputes.
+    - If the query is COMPLETELY UNRELATED to law (e.g., sports, general knowledge trivia, pop culture, entertainment, or casual chat), you MUST politely refuse to answer it. 
+    - When refusing, explain clearly and professionally what this system is designed to do. 
+      Example refusal tone: "I am an AI assistant specialized in Indian Legal Operations. I can help you with legal disputes, statutory compliance, or procedural queries like filing an FIR, but I cannot answer unrelated general trivia or sports questions. Please let me know how I can assist you with your legal needs."
+
+    IF THE QUERY IS LEGALLY RELEVANT, PROCEED WITH THE FOLLOWING RULES:
+    1. NEVER include internal routing language, labels, or case tags (e.g., Do NOT output "Handling Case 3" or "Okay this is case 3"). Jump straight into the natural answer.
+    2. Adapt your tone and structure completely to the nature of the legal query:
+       - For Procedural/How-To Requests (e.g., "What statement do I give in an FIR?"): Provide direct, actionable, conversational guidance starting naturally (e.g., "In an FIR, your statement should include..."). Do not force a rigid layout.
+       - For Complex Disputes/Case Assessments: Organize the response using clean markdown headings:
+         ### 1. YOUR CONSTITUTIONAL RIGHTS
+         ### 2. STATUTORY COMPLIANCE
+         ### 3. RECOMMENDED STRATEGY
+       - For General Legal Follow-ups/Clarifications: Provide a fluid, direct, professional conversational answer without formal headers.
     """
+    
     llm = get_llm()
     response = llm.invoke(prompt)
     return {"compiled_english_advice": extract_text(response.content).strip()}

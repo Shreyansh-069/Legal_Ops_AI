@@ -1,78 +1,54 @@
 import React from 'react';
-import { Globe, Shield, Activity } from 'lucide-react';
 
 const languages = [
-  { code: 'en', label: 'English', native: 'English', desc: 'System default query execution' },
-  { code: 'hi', label: 'Hindi', native: 'हिन्दी', desc: 'हिंदी अनुवाद तथा विश्लेषण' },
-  { code: 'ta', label: 'Tamil', native: 'தமிழ்', desc: 'தமிழ் மொழிபெயர்ப்பு மற்றும் பகுப்பாய்வு' },
-  { code: 'te', label: 'Telugu', native: 'తెలుగు', desc: 'తెలుగు అనువాదం మరియు విశ్లేషణ' },
-  { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ', desc: 'ಕನ್ನಡ ಅನುವಾದ ಮತ್ತು ವಿಶ್ಲೇಷಣೆ' },
-  { code: 'ml', label: 'Malayalam', native: 'മലയാളം', desc: 'മലയാള വിവർത്തനവും വിശകലനവും' }
+  { code: 'en', label: 'English', native: 'English', desc: 'Default language' },
+  { code: 'hi', label: 'Hindi', native: 'हिन्दी', desc: 'हिंदी में जवाब' },
+  { code: 'ta', label: 'Tamil', native: 'தமிழ்', desc: 'தமிழில் பதில்கள்' },
+  { code: 'te', label: 'Telugu', native: 'తెలుగు', desc: 'తెలుగులో సమాధానాలు' },
+  { code: 'kn', label: 'Kannada', native: 'ಕನ್ನಡ', desc: 'ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಗಳು' },
+  { code: 'ml', label: 'Malayalam', native: 'മലയാളം', desc: 'മലയാളത്തിൽ ഉത്തരങ്ങൾ' }
 ];
 
 export default function LanguageSelector({ onSelectLanguage }) {
   return (
-    <div className="relative w-full h-screen bg-cyber-dark flex items-center justify-center overflow-hidden font-sans">
-      {/* Decorative ambient glowing backdrops */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-electric-indigo/10 blur-[120px] pointer-events-none animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-tech-purple/10 blur-[120px] pointer-events-none animate-pulse"></div>
-      
-      {/* Futuristic Grid Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
-
-      {/* Central Glassmorphic Card */}
-      <div className="relative z-10 w-full max-w-2xl px-6 py-12 md:p-12 mx-4 cyber-glass rounded-2xl glow-indigo border border-electric-indigo/20 flex flex-col items-center text-center">
-        {/* Core Engine status top display */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-electric-indigo/10 border border-electric-indigo/30 text-xs font-mono text-electric-indigo tracking-wider mb-8 animate-pulse">
-          <Activity size={12} className="text-electric-indigo animate-spin" />
-          <span>CORE INTERCONNECT SYSTEM INITIALIZED</span>
-        </div>
-
-        {/* Brand & Heading */}
-        <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-electric-indigo to-tech-purple mb-6 glow-purple">
-          <Globe size={32} className="text-white animate-pulse" />
-        </div>
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent mb-3">
-          LEGALOPS <span className="bg-gradient-to-r from-electric-indigo to-tech-purple bg-clip-text text-transparent">AI</span>
+    <div className="w-full h-screen bg-bg flex items-center justify-center p-6 font-sans">
+      <div className="w-full max-w-lg bg-surface border border-border-light rounded-xl p-8 md:p-10 shadow-sm">
+        <h1 className="text-2xl font-semibold text-text mb-2">
+          Legal Ops AI
         </h1>
-        <p className="text-sm md:text-base text-slate-400 max-w-md mb-10 leading-relaxed">
-          Access local legal counsel and real-time Tavily search validation nodes. Please configure your localization stream to continue.
+        <p className="text-sm text-text-secondary mb-8 leading-relaxed">
+          This tool helps you look up legal questions .
+          Pick the language you want to use , you can change it later.
         </p>
 
-        {/* Language Selection Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
           {languages.map((lang) => (
             <button
               key={lang.code}
               onClick={() => onSelectLanguage(lang.code)}
-              className="group relative flex flex-col items-start p-5 rounded-xl bg-cyber-panel/50 border border-slate-800 hover:border-electric-indigo/50 text-left transition-all duration-300 hover:shadow-[0_0_15px_rgba(99,102,241,0.15)] cursor-pointer overflow-hidden"
+              className="flex flex-col items-start p-4 rounded-lg bg-surface-muted border border-border-light hover:border-accent hover:bg-accent-subtle text-left transition-colors cursor-pointer"
             >
-              {/* Button gradient hover reveal */}
-              <div className="absolute inset-0 bg-gradient-to-r from-electric-indigo/0 to-tech-purple/0 group-hover:from-electric-indigo/5 group-hover:to-tech-purple/5 transition-all duration-500"></div>
-              
               <div className="flex justify-between w-full items-center mb-1">
-                <span className="font-bold text-white text-base group-hover:text-electric-indigo transition-colors duration-300">
+                <span className="font-medium text-text text-sm">
                   {lang.label}
                 </span>
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 group-hover:bg-electric-indigo/20 group-hover:text-electric-indigo transition-colors duration-300">
+                <span className="text-xs px-2 py-0.5 rounded bg-surface border border-border-light text-text-muted">
                   {lang.code.toUpperCase()}
                 </span>
               </div>
-              <span className="text-xs text-tech-purple font-medium mb-2 opacity-90">
+              <span className="text-xs text-accent-dark font-medium mb-1">
                 {lang.native}
               </span>
-              <span className="text-xs text-slate-500 leading-normal line-clamp-1">
+              <span className="text-xs text-text-muted">
                 {lang.desc}
               </span>
             </button>
           ))}
         </div>
-        
-        {/* Footnote */}
-        <div className="flex items-center gap-1.5 mt-8 text-xs text-slate-500 font-mono">
-          <Shield size={12} className="text-slate-500" />
-          <span>SECURE END-TO-END CRYPTOGRAPHIC PIPELINE</span>
-        </div>
+
+        <p className="mt-6 text-xs text-text-faint">
+          Answers are for reference only. Talk to a lawyer before making any legal decisions.
+        </p>
       </div>
     </div>
   );

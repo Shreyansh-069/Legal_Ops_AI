@@ -6,12 +6,12 @@ import ChatWindow from './components/ChatWindow';
 import ChatInput from './components/ChatInput';
 
 const localizedWelcomes = {
-  en: "Welcome to LegalOps AI Engine Terminal. I have localized my stream to English. How can I assist you with your legal query today?",
-  hi: "लीगलऑप्स एआई इंजन टर्मिनल में आपका स्वागत है। मैंने अपना स्थानीयकरण स्ट्रीम हिंदी में सेट कर लिया है। आज मैं आपकी कानूनी समस्या में क्या सहायता कर सकता हूँ?",
-  ta: "LegalOps AI இன்ஜின் டெர்மினலுக்கு உங்களை வரவேற்கிறோம். எனது ஸ்ட்ரீம் தமிழில் உள்ளூர்மயமாக்கப்பட்டுள்ளது. இன்று உங்கள் சட்ட வினவலுக்கு நான் எவ்வாறு உதவ முடியும்?",
-  te: "LegalOps AI ఇంజిన్ టెర్మినల్‌కు స్వాగతం. నేను నా ஸ்ட்ரீమ్‌ను తెలుగులోకి మార్చాను. ఈరోజు మీ న్యాయపరమైన సందేహానికి నేను ఏ విధంగా సహాయం చేయగలను?",
-  kn: "LegalOps AI ಇಂಜಿನ್ ಟರ್ಮಿನಲ್‌ಗೆ ಸುಸ್ವಾಗತ. ನಾನು ಕನ್ನಡ ಸ್ಥಳೀಕರಣ ಸ್ಟ್ರೀಮ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿದ್ದೇನೆ. ಇಂದು ನಿಮ್ಮ ಕಾನೂನು ಪ್ರಶ್ನೆಗೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
-  ml: "LegalOps AI എഞ്ചിൻ ടെർമിനലിലേക്ക് സ്വാഗതം. ഞാൻ മലയാളം പ്രാദേശികവൽക്കരണം സജീവമാക്കിയിരിക്കുന്നു. നിങ്ങളുടെ നിയമപരമായ ചോദ്യങ്ങളിൽ ഇന്ന് ഞാൻ എങ്ങനെ സഹായിക്കണം?"
+  en: "Hi — I'm set to answer in English. Ask me anything about a legal situation and I'll do my best to help.",
+  hi: "नमस्ते — मैं हिंदी में जवाब दूंगा। कोई भी कानूनी सवाल पूछिए, मैं जितना हो सके मदद करूंगा।",
+  ta: "வணக்கம் — நான் தமிழில் பதிலளிக்க தயாராக இருக்கிறேன். உங்கள் சட்டக் கேள்வியைக் கேளுங்கள்.",
+  te: "హలో — నేను తెలుగులో సమాధానం ఇస్తాను. మీ న్యాయ సంబంధిత ప్రశ్న అడగండి.",
+  kn: "ನಮಸ್ಕಾರ — ನಾನು ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸುತ್ತೇನೆ. ನಿಮ್ಮ ಕಾನೂನು ಪ್ರಶ್ನೆಯನ್ನು ಕೇಳಿ.",
+  ml: "ഹലോ — ഞാൻ മലയാളത്തിൽ ഉത്തരം നൽകും. നിങ്ങളുടെ നിയമപരമായ ചോദ്യം ചോദിക്കൂ."
 };
 
 export default function App() {
@@ -19,7 +19,6 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Triggers when language selection is confirmed on the landing dashboard card
   const handleSelectLanguage = (lang) => {
@@ -38,7 +37,6 @@ export default function App() {
     setLanguage(null);
     setMessages([]);
     setInput('');
-    setSearchQuery('');
   };
 
   // Main Async payload fetch process
@@ -115,12 +113,12 @@ export default function App() {
         {
           id: `system-err-${Date.now()}`,
           sender: 'system',
-          text: "ERROR: Connection link with local LegalOps AI Core Engine is currently offline. Please ensure your Python backend server is active at http://localhost:8000."
+          text: "Can't reach the server. Make sure the backend is running at http://localhost:8000."
         },
         {
           id: `ai-err-fallback-${Date.now()}`,
           sender: 'ai',
-          text: "### LegalOps Core Connection Warning\n\nI was unable to establish connection with the central agent orchestrator. The Python FastAPI backend seems to be down or unreachable.\n\n**To boot up the core engine manually:**\n1. Open your terminal at the root workspace.\n2. Navigate to the backend directory: `cd backend`\n3. Activate the environment: `.\\venv\\Scripts\\activate` (Windows)\n4. Boot the server: `python main.py`\n\nOnce the connection is established, I will be ready to process live search queries and case analyses."
+          text: "### Server isn't running\n\nI couldn't connect to the backend. It might not be started yet.\n\n**To start it:**\n1. Open a terminal in the project folder.\n2. Go to the backend: `cd backend`\n3. Activate the virtual environment: `.\\venv\\Scripts\\activate` (Windows)\n4. Start the server: `python main.py`\n\nOnce it's running, try your question again."
         }
       ]);
     } finally {
@@ -128,24 +126,14 @@ export default function App() {
     }
   };
 
-  // Select mock consultation from Sidebar and submit it
-  const handleSelectMockQuery = (queryText) => {
-    setInput(queryText);
-  };
-
   if (!language) {
     return <LanguageSelector onSelectLanguage={handleSelectLanguage} />;
   }
 
   return (
-    <div className="flex w-screen h-screen bg-cyber-dark overflow-hidden font-sans">
+    <div className="flex w-screen h-screen bg-bg overflow-hidden font-sans">
       {/* Desktop view sidebar */}
-      <Sidebar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        onResetLanguage={handleResetLanguage}
-        onSelectMockQuery={handleSelectMockQuery}
-      />
+      <Sidebar onResetLanguage={handleResetLanguage} />
 
       {/* Main dashboard viewport area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
