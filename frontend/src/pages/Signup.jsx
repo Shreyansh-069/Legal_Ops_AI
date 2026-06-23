@@ -14,7 +14,7 @@ export default function Signup() {
   const [submitting, setSubmitting] = useState(false);
 
   if (user) {
-    navigate('/', { replace: true });
+    navigate('/chat', { replace: true });
     return null;
   }
 
@@ -35,7 +35,7 @@ export default function Signup() {
     setSubmitting(true);
     try {
       await signup(email, password);
-      navigate('/', { replace: true });
+      navigate('/chat', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not create account. Try again.');
     } finally {

@@ -13,7 +13,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   if (user) {
-    navigate('/', { replace: true });
+    navigate('/chat', { replace: true });
     return null;
   }
 
@@ -23,7 +23,7 @@ export default function Login() {
     setSubmitting(true);
     try {
       await login(email, password);
-      navigate('/', { replace: true });
+      navigate('/chat', { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not sign in. Try again.');
     } finally {
