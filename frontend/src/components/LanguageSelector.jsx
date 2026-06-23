@@ -1,4 +1,5 @@
 import React from 'react';
+import { Scale } from 'lucide-react';
 
 const languages = [
   { code: 'en', label: 'English', native: 'English', desc: 'Default language' },
@@ -12,13 +13,23 @@ const languages = [
 export default function LanguageSelector({ onSelectLanguage }) {
   return (
     <div className="w-full h-screen bg-bg flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-lg bg-surface border border-border-light rounded-xl p-8 md:p-10 shadow-sm">
-        <h1 className="text-2xl font-semibold text-text mb-2">
-          Legal Ops AI
-        </h1>
+      <div className="w-full max-w-lg bg-surface-raised border border-border-light rounded-lg p-8 md:p-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-md bg-accent flex items-center justify-center">
+            <Scale size={20} className="text-brass-muted" />
+          </div>
+          <div>
+            <h1 className="font-serif text-2xl font-semibold text-text tracking-wide">
+              Legal Ops AI
+            </h1>
+            <p className="text-[10px] uppercase tracking-widest text-text-faint mt-0.5">
+              Language preference
+            </p>
+          </div>
+        </div>
+
         <p className="text-sm text-text-secondary mb-8 leading-relaxed">
-          This tool helps you look up legal questions .
-          Pick the language you want to use , you can change it later.
+          Choose the language for your consultations. You can change this later from the sidebar.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
@@ -26,17 +37,17 @@ export default function LanguageSelector({ onSelectLanguage }) {
             <button
               key={lang.code}
               onClick={() => onSelectLanguage(lang.code)}
-              className="flex flex-col items-start p-4 rounded-lg bg-surface-muted border border-border-light hover:border-accent hover:bg-accent-subtle text-left transition-colors cursor-pointer"
+              className="flex flex-col items-start p-4 rounded-md bg-surface border border-border-light hover:border-brass text-left transition-colors cursor-pointer"
             >
               <div className="flex justify-between w-full items-center mb-1">
                 <span className="font-medium text-text text-sm">
                   {lang.label}
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded bg-surface border border-border-light text-text-muted">
-                  {lang.code.toUpperCase()}
+                <span className="text-[10px] px-2 py-0.5 rounded bg-surface-muted border border-border-light text-text-muted uppercase tracking-wider">
+                  {lang.code}
                 </span>
               </div>
-              <span className="text-xs text-accent-dark font-medium mb-1">
+              <span className="text-xs text-brass font-medium mb-1">
                 {lang.native}
               </span>
               <span className="text-xs text-text-muted">
@@ -46,8 +57,8 @@ export default function LanguageSelector({ onSelectLanguage }) {
           ))}
         </div>
 
-        <p className="mt-6 text-xs text-text-faint">
-          Answers are for reference only. Talk to a lawyer before making any legal decisions.
+        <p className="mt-6 text-[10px] text-text-faint uppercase tracking-wide">
+          For reference only. Consult a qualified attorney before acting on any information.
         </p>
       </div>
     </div>
