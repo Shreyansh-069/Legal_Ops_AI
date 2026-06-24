@@ -1,102 +1,80 @@
-import React, { useRef, useEffect } from 'react';
-import { Send, Sparkles, AlertCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
 
-const promptTemplates = [
-  "Encroachment on ancestral land in Karnataka",
-  "Breach of NDA by freelance designer",
-  "Employer delayed final settlement payment",
-  "Product refund refusal by e-commerce app"
-];
+export default function ChatInput({ onSubmit, isLoading, input, setInput }) {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
-export default function ChatInput({ input, setInput, onSubmit, isLoading }) {
-  const textareaRef = useRef(null);
-
-  // Auto-resize input textarea to fit text length height
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
-    }
-  }, [input]);
-
-  const handleSubmit = (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (isLoading || !input.trim()) return;
-    onSubmit(input.trim());
+    if (!input.trim() && !selectedFile) return;
+    
+    onSubmit(input, selectedFile);
     setInput('');
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setSelectedFile(file);
+    } else {
+      alert("Please upload standard PDF document formats only.");
     }
   };
 
   return (
-    <div className="p-4 md:p-6 border-t border-electric-indigo/15 bg-cyber-panel/40 backdrop-blur-md font-sans">
-      
-      {/* Suggestions template list */}
-      <div className="max-w-4xl mx-auto flex flex-wrap gap-2 mb-3.5">
-        {promptTemplates.map((template, idx) => (
-          <button
-            key={idx}
-            type="button"
-            disabled={isLoading}
-            onClick={() => setInput(template)}
-            className="text-[11px] font-medium px-3 py-1.5 rounded-lg bg-cyber-dark/60 border border-slate-800 text-slate-400 hover:border-electric-indigo/30 hover:text-electric-indigo hover:bg-cyber-dark transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+    <form onSubmit={handleFormSubmit} className="space-y-2.5 pt-4 border-t border-[#dcd6c5]">
+      {selectedFile && (
+        <div className="flex items-center gap-2 bg-[#faf9f6] border border-[#dcd6c5] rounded px-3 py-1 text-xs text-[#4a3728] font-mono font-semibold w-fit animate-fade-in">
+          <span>Attachment: {selectedFile.name}</span>
+          <button 
+            type="button" 
+            onClick={() => { setSelectedFile(null); fileInputRef.current.value = ''; }}
+            className="hover:text-red-650 font-bold ml-1 cursor-pointer transition-colors"
           >
-            {template}
+            ×
           </button>
-        ))}
-      </div>
-
-      {/* Main input form block */}
-      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex gap-3 items-end">
-        <div className="flex-1 relative bg-cyber-dark/80 rounded-2xl border border-slate-800 focus-within:border-electric-indigo/40 transition-colors">
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-            placeholder={isLoading ? "Please wait for core agent completion..." : "State your legal grievance or upload a consultation request here..."}
-            className="w-full bg-transparent border-0 resize-none py-3.5 pl-4 pr-12 text-sm text-white focus:outline-none focus:ring-0 max-h-40 min-h-[46px] disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ overflowY: 'auto' }}
-          />
-          {isLoading && (
-            <div className="absolute right-4 bottom-3 text-slate-500">
-              <div className="w-5 h-5 border-2 border-electric-indigo border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
         </div>
+      )}
 
-        {/* Sleek Primary gradient Analyze Button */}
+      <div className="flex items-center bg-[#faf9f6] border border-[#dcd6c5] rounded-lg px-3.5 py-2.5 focus-within:border-[#4a3728] transition-colors">
+        <input 
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept=".pdf"
+          className="hidden"
+        />
+        
+        <button
+          type="button"
+          onClick={() => fileInputRef.current.click()}
+          className="p-1.5 text-[#8a7c6e] hover:text-[#4a3728] transition-colors cursor-pointer mr-2"
+          title="Upload reference PDF"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+          </svg>
+        </button>
+
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={selectedFile ? "Ask a question about this PDF..." : "Ask a question or explain your situation..."}
+          disabled={isLoading}
+          className="flex-1 bg-transparent text-sm text-[#4a3728] placeholder-[#8a7c6e] focus:outline-none py-1"
+        />
+
         <button
           type="submit"
-          disabled={isLoading || !input.trim()}
-          className="h-[46px] px-6 rounded-2xl bg-gradient-to-r from-electric-indigo to-tech-purple text-white text-xs font-mono font-bold tracking-wider hover:opacity-95 active:scale-98 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:scale-100 glow-indigo"
+          disabled={isLoading || (!input.trim() && !selectedFile)}
+          className="ml-3 bg-[#4a3728] hover:bg-[#604a39] text-white rounded-lg text-xs font-mono font-semibold tracking-wider px-4 py-2 transition-colors disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer uppercase"
         >
-          {isLoading ? (
-            <>
-              <span>PROCESSING</span>
-              <Sparkles size={14} className="animate-spin text-white" />
-            </>
-          ) : (
-            <>
-              <span>ANALYZE CASE</span>
-              <Send size={14} className="text-white" />
-            </>
-          )}
+          {isLoading ? 'Thinking...' : 'Send'}
         </button>
-      </form>
-      
-      {/* Disclaimer details */}
-      <div className="max-w-4xl mx-auto flex items-center gap-1.5 mt-2.5 px-1 text-[10px] text-slate-600 font-mono">
-        <AlertCircle size={10} className="shrink-0" />
-        <span>NOTICE: LegalOps AI outputs are synthesized references. Confirm critical litigation with qualified legal practitioners.</span>
       </div>
-    </div>
+    </form>
   );
 }

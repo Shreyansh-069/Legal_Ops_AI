@@ -2,28 +2,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cyber-dark: #030712;
-  --color-cyber-panel: #0b1528;
-  --color-cyber-border: rgba(99, 102, 241, 0.15);
-  --color-electric-indigo: #6366f1;
-  --color-tech-purple: #a855f7;
+  --color-brand-beige: #f5f2eb;
+  --color-brand-beige-light: #faf9f6;
+  --color-brand-beige-dark: #e8e3d5;
+  --color-brand-brown: #4a3728;
+  --color-brand-brown-light: #604a39;
+  --color-brand-brown-dark: #35251a;
+  --color-brand-taupe: #8a7c6e;
+  --color-brand-border: #dcd6c5;
+  --color-brand-border-dark: #c5bba6;
   
   --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  
-  --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  
-  @keyframes pulse-glow {
-    0%, 100% {
-      opacity: 1;
-      transform: scale(1);
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
-    }
-    50% {
-      opacity: .6;
-      transform: scale(0.95);
-      box-shadow: 0 0 5px rgba(99, 102, 241, 0.2);
-    }
-  }
 }
 
 /* Base resets & custom scrollbar */
@@ -32,51 +21,51 @@ html, body, #root {
   padding: 0;
   width: 100%;
   height: 100%;
-  background-color: #030712;
-  color: #f3f4f6;
+  background-color: #f5f2eb;
+  color: #4a3728;
   font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   overflow: hidden;
 }
 
-/* Custom Scrollbar for cyber theme */
+/* Custom Scrollbar for warm theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #030712;
+  background: #f5f2eb;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 9999px;
+  background: #dcd6c5;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f1;
+  background: #4a3728;
 }
 
-/* Utility for smooth custom glass backdrop */
-.cyber-glass {
-  background: rgba(11, 21, 40, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+/* Common Layout Helpers */
+.minimal-border {
+  border: 1px solid #dcd6c5;
 }
 
-.text-glow-indigo {
-  text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+.minimal-card {
+  background-color: #ffffff;
+  border: 1px solid #dcd6c5;
+  border-radius: 8px;
 }
 
-.text-glow-purple {
-  text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+.minimal-input {
+  background-color: #faf9f6;
+  border: 1px solid #dcd6c5;
+  color: #4a3728;
+  border-radius: 6px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.glow-indigo {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.25);
-}
-
-.glow-purple {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.25);
+.minimal-input:focus {
+  border-color: #4a3728;
+  outline: none;
 }
