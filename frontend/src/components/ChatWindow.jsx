@@ -13,7 +13,7 @@ function FormatMessageContent({ text }) {
         if (trimmed.startsWith('###') || trimmed.startsWith('##') || trimmed.startsWith('#')) {
           const headerText = trimmed.replace(/^#+\s*/, '');
           return (
-            <h4 key={idx} className="text-text font-semibold text-base mt-3 mb-1 border-b border-border-light pb-1">
+            <h4 key={idx} className="font-serif text-text font-semibold text-base mt-3 mb-1 border-b border-border-light pb-1">
               {headerText}
             </h4>
           );
@@ -31,7 +31,7 @@ function FormatMessageContent({ text }) {
             return (
               <ul key={idx} className="list-disc pl-5 space-y-1">
                 <li>
-                  <strong className="text-accent-dark font-medium">{boldMatch[1]}</strong>
+                  <strong className="text-brass font-medium">{boldMatch[1]}</strong>
                   <span>{boldMatch[2]}</span>
                 </li>
               </ul>
@@ -51,7 +51,7 @@ function FormatMessageContent({ text }) {
             return (
               <ol key={idx} className="list-decimal pl-5 space-y-1">
                 <li>
-                  <strong className="text-accent-dark font-medium">{boldMatch[1]}</strong>
+                  <strong className="text-brass font-medium">{boldMatch[1]}</strong>
                   <span>{boldMatch[2]}</span>
                 </li>
               </ol>
@@ -85,10 +85,10 @@ function FormatMessageContent({ text }) {
 }
 
 const loadingSteps = [
-  'Searching for relevant laws and cases...',
-  'Reading through what came back...',
-  'Putting together an answer...',
-  'Formatting the response...'
+  'Searching relevant statutes and case law...',
+  'Reviewing retrieved sources...',
+  'Drafting response...',
+  'Finalising output...'
 ];
 
 export default function ChatWindow({ messages, isLoading }) {
@@ -119,7 +119,7 @@ export default function ChatWindow({ messages, isLoading }) {
         if (isSystem) {
           return (
             <div key={msg.id} className="flex justify-center my-3">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 max-w-lg">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-950/20 border border-red-800/30 text-xs text-red-400 max-w-lg">
                 <AlertTriangle size={14} className="shrink-0" />
                 <span>{msg.text}</span>
               </div>
@@ -132,22 +132,22 @@ export default function ChatWindow({ messages, isLoading }) {
             key={msg.id}
             className={`flex gap-3 max-w-3xl ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
           >
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${
+            <div className={`w-8 h-8 rounded-md flex items-center justify-center border shrink-0 ${
               isUser
-                ? 'bg-accent-dark border-accent-dark text-white'
-                : 'bg-accent-subtle border-accent-muted text-accent-dark'
+                ? 'bg-accent border-accent text-white'
+                : 'bg-surface-muted border-border-light text-brass'
             }`}>
               {isUser ? <User size={15} /> : <Bot size={15} />}
             </div>
 
             <div className="flex flex-col space-y-1">
-              <span className={`text-[11px] text-text-faint ${isUser ? 'text-right' : 'text-left'}`}>
-                {isUser ? 'You' : 'Legal Ops AI'}
+              <span className={`text-[10px] uppercase tracking-wider text-text-faint ${isUser ? 'text-right' : 'text-left'}`}>
+                {isUser ? 'Counsel request' : 'Legal Ops AI'}
               </span>
-              <div className={`p-4 rounded-xl ${
+              <div className={`p-4 rounded-md ${
                 isUser
-                  ? 'bg-accent text-white rounded-tr-sm'
-                  : 'bg-surface border border-border-light text-text-secondary rounded-tl-sm shadow-sm'
+                  ? 'bg-accent text-white rounded-tr-none'
+                  : 'bg-surface-raised border border-border-light text-text-secondary rounded-tl-none'
               }`}>
                 {isUser ? (
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
@@ -162,22 +162,22 @@ export default function ChatWindow({ messages, isLoading }) {
 
       {isLoading && (
         <div className="flex gap-3 max-w-2xl mr-auto">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent-subtle border border-accent-muted text-accent-dark shrink-0">
+          <div className="w-8 h-8 rounded-md flex items-center justify-center bg-surface-muted border border-border-light text-brass shrink-0">
             <Bot size={15} />
           </div>
 
           <div className="flex flex-col space-y-1 flex-1">
-            <span className="text-[11px] text-text-muted">
+            <span className="text-[10px] uppercase tracking-wider text-text-faint">
               Legal Ops AI
             </span>
-            <div className="p-4 rounded-xl rounded-tl-sm bg-surface border border-border-light shadow-sm">
+            <div className="p-4 rounded-md rounded-tl-none bg-surface-raised border border-border-light">
               <p className="text-sm text-text-secondary mb-3">
-                Working on your question...
+                Researching your question...
               </p>
               <div className="space-y-2 text-xs text-text-muted">
                 {loadingSteps.map((step, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full ${activeStep >= idx ? 'bg-accent-light' : 'bg-border-light'}`}></div>
+                    <div className={`w-1.5 h-1.5 rounded-full ${activeStep >= idx ? 'bg-brass' : 'bg-border-light'}`}></div>
                     <span className={activeStep === idx ? 'text-text-secondary' : ''}>
                       {step}
                     </span>

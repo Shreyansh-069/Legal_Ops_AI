@@ -1,77 +1,52 @@
+import os
+
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from agents.graph import legal_ops_graph
+from pymongo.errors import ServerSelectionTimeoutError
+
 from agents.legal_finder import initialize_vector_db
+from auth.router import router as auth_router
+from chat.router import router as chat_router
+from database.mongodb import close_mongo_connection, connect_to_mongo, mongo_connection_error_message
 
-app = FastAPI(title="LegalOps AI Core Engine Terminal")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-# Avoid cross-origin web tracking blocks from localhost connections
+app = FastAPI(title="Legal Ops AI")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class LegalRequest(BaseModel):
-    query: str
+app.include_router(auth_router)
+app.include_router(chat_router)
 
-class ChatRequest(BaseModel):
-    query: str
-    language: str = None
+
+@app.get("/api/health")
+async def health():
+    return {"status": "ok"}
+
 
 @app.on_event("startup")
-def startup_event():
-    """Startup event hook for the FastAPI backend server."""
-    print("LegalOps Core Engine API server started successfully.")
-
-@app.post("/api/query-legal-ops")
-async def process_legal_ops(payload: LegalRequest):
-    if not payload.query.strip():
-        raise HTTPException(status_code=400, detail="Grievance string parameter empty.")
+async def startup_event():
     try:
-        # Initialize an empty processing matrix configuration
-        execution_input = {
-            "raw_query": payload.query,
-            "language": "en",
-            "constitutional_data": "",
-            "web_data": "",
-            "compiled_english_advice": "",
-            "final_localized_response": ""
-        }
-        output = legal_ops_graph.invoke(execution_input)
-        return {
-            "language": output.get("language"),
-            "response": output.get("final_localized_response")
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        await connect_to_mongo()
+        print("Legal Ops AI API started. MongoDB connected.")
+    except ServerSelectionTimeoutError as exc:
+        raise RuntimeError(mongo_connection_error_message()) from exc
 
-@app.post("/api/chat")
-async def chat_legal_ops(payload: ChatRequest):
-    if not payload.query.strip():
-        raise HTTPException(status_code=400, detail="Query string parameter empty.")
-    try:
-        execution_input = {
-            "raw_query": payload.query,
-            "language": payload.language or "en",
-            "constitutional_data": "",
-            "web_data": "",
-            "compiled_english_advice": "",
-            "final_localized_response": ""
-        }
-        output = legal_ops_graph.invoke(execution_input)
-        return {
-            "language": output.get("language"),
-            "response": output.get("final_localized_response")
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await close_mongo_connection()
+
 
 if __name__ == "__main__":
     print("Initializing and compiling the Local Vector Database...")
