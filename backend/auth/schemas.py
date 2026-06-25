@@ -1,16 +1,14 @@
 from pydantic import BaseModel, EmailStr, Field
 
 
-class SignupRequest(BaseModel):
+class OTPRequest(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
 
 
-class LoginRequest(BaseModel):
+class OTPVerify(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=1, max_length=128)
-
-
+    otp: str = Field(..., pattern=r"^\d{6}$")
 class UserResponse(BaseModel):
     id: str
     email: str
+    email_verified: bool = False

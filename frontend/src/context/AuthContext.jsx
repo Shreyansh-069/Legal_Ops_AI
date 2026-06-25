@@ -25,17 +25,14 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
-
-  const login = async (email, password) => {
-    const loggedInUser = await authApi.login(email, password);
-    setUser(loggedInUser);
-    return loggedInUser;
+  const requestOtp = async (email) => {
+    return await authApi.requestOtp(email);
   };
 
-  const signup = async (email, password) => {
-    const newUser = await authApi.signup(email, password);
-    setUser(newUser);
-    return newUser;
+  const verifyOtp = async (email, otp) => {
+    const verifiedUser = await authApi.verifyOtp(email, otp);
+    setUser(verifiedUser);
+    return verifiedUser;
   };
 
   const logout = async () => {
@@ -44,11 +41,10 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, requestOtp, verifyOtp, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
-  );
-}
+  );}
 
 export function useAuth() {
   const context = useContext(AuthContext);

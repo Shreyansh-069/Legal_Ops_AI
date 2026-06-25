@@ -1,16 +1,16 @@
 import { apiFetch } from './client';
 
-export function signup(email, password) {
-  return apiFetch('/api/auth/signup', {
+export function requestOtp(email) {
+  return apiFetch('/api/auth/otp/request', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email }),
   });
 }
 
-export function login(email, password) {
-  return apiFetch('/api/auth/login', {
+export function verifyOtp(email, otp) {
+  return apiFetch('/api/auth/otp/verify', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, otp }),
   });
 }
 
