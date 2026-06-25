@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Response, status, BackgroundTasks
 
 from auth.dependencies import get_current_user
-from auth.schemas import LoginRequest, SignupRequest, UserResponse
+from auth.schemas import OTPRequest, OTPVerify, UserResponse
 from auth.security import COOKIE_NAME, COOKIE_SECURE, JWT_EXPIRE_HOURS, create_access_token
-from auth.service import authenticate_user, create_user
+from auth.service import request_otp, verify_otp
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -27,18 +27,20 @@ def _clear_auth_cookie(response: Response) -> None:
     response.delete_cookie(key=COOKIE_NAME, path="/")
 
 
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def signup(payload: SignupRequest, response: Response):
-    user = await create_user(payload.email, payload.password)
-    token = create_access_token(user["id"])
-    _set_auth_cookie(response, token)
-    return user
+@router.post("/otp/request", status_code=status.HTTP_200_OK)
+async def request_otp_code(payload: OTPRequest, background_tasks: BackgroundTasks):
+    await request_otp(payload.email, background_tasks)
+    return {"message": "Verification code sent to your email."}
 
 
-@router.post("/login", response_model=UserResponse)
-async def login(payload: LoginRequest, response: Response):
-    user = await authenticate_user(payload.email, payload.password)
+@router.post("/otp/verify", response_model=UserResponse)
+async def verify_otp_code(payload: OTPVerify, response: Response):
+    user = await verify_otp(payload.email, payload.otp)
+    
+    # SUCCESS WORKFLOW:
+    # [JWT access token generation placeholder]
     token = create_access_token(user["id"])
+    
     _set_auth_cookie(response, token)
     return user
 

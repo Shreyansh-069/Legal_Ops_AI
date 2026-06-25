@@ -17,3 +17,4 @@ pymongo
 python-jose[cryptography]
 bcrypt
 python-multipart
+fastapi-mail
