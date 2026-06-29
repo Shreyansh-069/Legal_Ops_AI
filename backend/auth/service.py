@@ -150,7 +150,7 @@ async def verify_otp(email: str, submitted_otp: str) -> dict:
     # 1. Immediately delete from temporary storage to prevent replay attacks
     del otp_storage[normalized]
         # 2. Get or create the user document in MongoDB
-    db = get_database()
+    db = await get_database()
     user = await db.users.find_one({"email": normalized})
     if not user:
         user_doc = {
@@ -174,7 +174,7 @@ async def get_user_by_id(user_id: str) -> dict | None:
     from bson import ObjectId
     from bson.errors import InvalidId
 
-    db = get_database()
+    db = await get_database()
     try:
         user = await db.users.find_one({"_id": ObjectId(user_id)})
     except InvalidId:

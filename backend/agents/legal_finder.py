@@ -2,9 +2,16 @@ import os
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from database.mongodb import get_database
 
-# Initialize Google GenAI Embeddings using the text-embedding-004 model.
-# It automatically reads GOOGLE_API_KEY from the environment.
-embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+# Initialize Google GenAI Embeddings lazily using text-embedding-004/gemini-embedding-001 model.
+_embeddings = None
+
+def get_embeddings():
+    global _embeddings
+    if _embeddings is None:
+        import os
+        api_key = os.getenv("GOOGLE_API_KEY")
+        _embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001", google_api_key=api_key)
+    return _embeddings
 
 def initialize_vector_db():
     """Dummy initialization function to maintain compatibility with main.py.
@@ -16,14 +23,15 @@ def initialize_vector_db():
 async def search_constitutional_acts(query: str) -> str:
     """Performs semantic lookup across the MongoDB Atlas Vector Search layer."""
     try:
-        db = get_database()
+        db = await get_database()
     except RuntimeError as e:
         print(f"[WARNING] Database connection error: {e}")
         return "No local constitutional data acts mapped or uploaded for reference lookup."
 
     try:
         # Generate query vector using Google GenAI embeddings
-        query_vector = await embeddings.aembed_query(query)
+        embeddings_inst = get_embeddings()
+        query_vector = await embeddings_inst.aembed_query(query)
     except Exception as e:
         print(f"[ERROR] Failed to generate query embedding: {e}")
         return "Vector database error during embedding generation."
