@@ -30,8 +30,8 @@ def routing_node(state: LegalState):
     lang = detect_language(state["raw_query"])
     return {"language": lang}
 
-def document_finder_node(state: LegalState):
-    doc_context = search_constitutional_acts(state["raw_query"])
+async def document_finder_node(state: LegalState):
+    doc_context = await search_constitutional_acts(state["raw_query"])
     return {"constitutional_data": doc_context}
 
 def web_lookup_node(state: LegalState):

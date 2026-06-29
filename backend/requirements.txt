@@ -3,7 +3,6 @@ uvicorn
 langgraph
 langchain-google-genai
 langchain-community
-chromadb
 pydantic
 pydantic[email]
 tavily-python
@@ -11,7 +10,6 @@ pypdf
 pdfplumber
 google-generativeai
 python-dotenv
-sentence-transformers
 motor
 pymongo
 python-jose[cryptography]
