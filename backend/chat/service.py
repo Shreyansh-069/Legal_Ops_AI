@@ -66,7 +66,7 @@ async def send_chat_message(user_id: str, query: str, language: str, conversatio
     }
 
     try:
-        output = await asyncio.to_thread(legal_ops_graph.invoke, execution_input)
+        output = await legal_ops_graph.ainvoke(execution_input)
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
 
