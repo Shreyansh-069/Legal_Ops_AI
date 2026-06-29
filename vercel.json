@@ -19,6 +19,10 @@
       "dest": "backend/main.py"
     },
     {
+      "src": "/((?!api/).*\\.[a-zA-Z0-9]+)",
+      "dest": "frontend/$1"
+    },
+    {
       "handle": "filesystem"
     },
     {
