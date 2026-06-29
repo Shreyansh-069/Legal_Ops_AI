@@ -106,7 +106,10 @@ async def request_otp(email: str, background_tasks: BackgroundTasks) -> None:
         "last_requested_at": now
     }
     
-    background_tasks.add_task(send_otp_email_task, normalized, otp)
+    # In a serverless environment (like Vercel), background tasks are not guaranteed to complete
+    # because the container can be frozen immediately after returning the response.
+    # Awaiting the email sending task ensures it completes before the response is returned.
+    await send_otp_email_task(normalized, otp)
 
 
 async def verify_otp(email: str, submitted_otp: str) -> dict:
