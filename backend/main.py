@@ -39,8 +39,8 @@ async def startup_event():
     try:
         await connect_to_mongo()
         print("Legal Ops AI API started. MongoDB connected.")
-    except ServerSelectionTimeoutError as exc:
-        raise RuntimeError(mongo_connection_error_message()) from exc
+    except Exception as exc:
+        print(f"Warning: MongoDB connection failed on startup: {exc}. Will retry on next database access.")
 
 
 @app.on_event("shutdown")

@@ -17,7 +17,7 @@ def _conversation_title(query: str) -> str:
 
 
 async def _get_owned_conversation(conversation_id: str, user_id: str) -> dict:
-    db = get_database()
+    db = await get_database()
     try:
         oid = ObjectId(conversation_id)
     except InvalidId:
@@ -31,7 +31,7 @@ async def _get_owned_conversation(conversation_id: str, user_id: str) -> dict:
 
 
 async def send_chat_message(user_id: str, query: str, language: str, conversation_id: str | None) -> dict:
-    db = get_database()
+    db = await get_database()
     now = datetime.now(timezone.utc)
 
     if conversation_id:
@@ -94,7 +94,7 @@ async def send_chat_message(user_id: str, query: str, language: str, conversatio
 
 
 async def list_conversations(user_id: str) -> list[dict]:
-    db = get_database()
+    db = await get_database()
     cursor = db.conversations.find({"user_id": user_id}).sort("updated_at", -1)
     conversations = []
     async for doc in cursor:
@@ -109,7 +109,7 @@ async def list_conversations(user_id: str) -> list[dict]:
 
 async def get_conversation_messages(user_id: str, conversation_id: str) -> dict:
     conversation = await _get_owned_conversation(conversation_id, user_id)
-    db = get_database()
+    db = await get_database()
 
     cursor = db.messages.find({"conversation_id": conversation["_id"]}).sort("created_at", 1)
     messages = []
@@ -130,7 +130,7 @@ async def get_conversation_messages(user_id: str, conversation_id: str) -> dict:
 
 
 async def create_conversation(user_id: str, language: str) -> dict:
-    db = get_database()
+    db = await get_database()
     now = datetime.now(timezone.utc)
     doc = {
         "user_id": user_id,
@@ -149,7 +149,7 @@ async def create_conversation(user_id: str, language: str) -> dict:
 
 
 async def clear_all_conversations(user_id: str) -> int:
-    db = get_database()
+    db = await get_database()
     conv_ids = []
     async for doc in db.conversations.find({"user_id": user_id}, {"_id": 1}):
         conv_ids.append(doc["_id"])
