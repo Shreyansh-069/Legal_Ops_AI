@@ -33,7 +33,7 @@ export default function Navbar({ language, user, onLogout }) {
         {user && (
           <div className="hidden sm:flex items-center bg-surface-muted border border-border-light rounded-md px-3 py-1.5">
             <span className="text-xs text-text-muted truncate max-w-[160px]">
-              {user.email}
+              {user.username}
             </span>
           </div>
         )}

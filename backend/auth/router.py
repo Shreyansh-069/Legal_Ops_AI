@@ -3,11 +3,25 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Response, status, BackgroundTasks
 
 from auth.dependencies import get_current_user
-from auth.schemas import OTPRequest, OTPVerify, UserResponse
+from auth.schemas import OTPRequest, OTPVerify, UserResponse, RegisterRequest, LoginRequest
 from auth.security import COOKIE_NAME, COOKIE_SECURE, JWT_EXPIRE_HOURS, create_access_token
-from auth.service import request_otp, verify_otp
+from auth.service import request_otp, verify_otp, register_user, login_user
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+@router.post("/register", status_code=status.HTTP_200_OK)
+async def register(payload: RegisterRequest, background_tasks: BackgroundTasks):
+    await register_user(payload.username, payload.email, payload.password, background_tasks)
+    return {"message": "Verification code sent to your email."}
+
+
+@router.post("/login", response_model=UserResponse)
+async def login(payload: LoginRequest, response: Response):
+    user = await login_user(payload.email, payload.password)
+    token = create_access_token(user["id"])
+    _set_auth_cookie(response, token)
+    return user
 
 
 def _set_auth_cookie(response: Response, token: str) -> None:

@@ -37,6 +37,7 @@ def _user_response(user: dict) -> dict:
     return {
         "id": str(user["_id"]),
         "email": user["email"],
+        "username": user.get("username"),
         "email_verified": user.get("email_verified", False),
     }
 async def send_otp_email_task(email: str, otp: str) -> None:
@@ -199,4 +200,79 @@ async def get_user_by_id(user_id: str) -> dict | None:
     if not user:
         return None
 
+    return _user_response(user)
+
+
+async def register_user(username: str, email: str, password_raw: str, background_tasks: BackgroundTasks) -> None:
+    normalized = _normalize_email(email)
+    now = datetime.now(timezone.utc)
+    
+    db = await get_database()
+    
+    # Check if a verified user with this email already exists
+    existing = await db.users.find_one({"email": normalized})
+    if existing and existing.get("email_verified"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An account with this email address already exists."
+        )
+        
+    # Check if username is already taken by a verified user
+    if username:
+        existing_username = await db.users.find_one({"username": username})
+        if existing_username and existing_username.get("email_verified"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This username is already taken."
+            )
+            
+    # Hash the password
+    from auth.security import hash_password
+    hashed_password = hash_password(password_raw)
+    
+    # Upsert the user document with verified=False
+    user_data = {
+        "email": normalized,
+        "username": username,
+        "password": hashed_password,
+        "email_verified": False,
+        "updated_at": now
+    }
+    
+    if not existing:
+        user_data["created_at"] = now
+        await db.users.insert_one(user_data)
+    else:
+        user_data["_id"] = existing["_id"]
+        user_data["created_at"] = existing.get("created_at", now)
+        await db.users.replace_one({"_id": existing["_id"]}, user_data)
+        
+    # Trigger OTP request to send validation code
+    await request_otp(normalized, background_tasks)
+
+
+async def login_user(email: str, password_raw: str) -> dict:
+    normalized = _normalize_email(email)
+    db = await get_database()
+    
+    user = await db.users.find_one({"email": normalized})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password."
+        )
+        
+    if not user.get("email_verified"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your email is not verified yet. Please sign up again to verify your email."
+        )
+        
+    from auth.security import verify_password
+    if not verify_password(password_raw, user.get("password", "")):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password."
+        )
+        
     return _user_response(user)
