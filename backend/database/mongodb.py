@@ -27,6 +27,7 @@ async def connect_to_mongo() -> None:
     try:
         await _client.admin.command("ping")
         await _db.users.create_index("email", unique=True)
+        await _db.otps.create_index("email", unique=True)
         await _db.conversations.create_index([("user_id", 1), ("updated_at", -1)])
         await _db.messages.create_index([("conversation_id", 1), ("created_at", 1)])
     except Exception as exc:

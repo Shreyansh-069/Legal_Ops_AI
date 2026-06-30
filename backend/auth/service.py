@@ -7,15 +7,6 @@ from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 
 from database.mongodb import get_database
 
-# Temporary in-memory storage for OTP records
-# Key: normalized email
-# Value: dict containing:
-#   "otp": str
-#   "created_at": datetime (UTC)
-#   "attempts": int
-#   "last_requested_at": datetime (UTC)
-otp_storage: dict[str, dict] = {}
-
 # fastapi-mail Configuration
 MAIL_USERNAME = os.getenv("MAIL_USERNAME", "test@example.com")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "testpass")
@@ -87,24 +78,37 @@ async def request_otp(email: str, background_tasks: BackgroundTasks) -> None:
     normalized = _normalize_email(email)
     now = datetime.now(timezone.utc)
     
+    db = await get_database()
+    record = await db.otps.find_one({"email": normalized})
+    
     # 60s cooldown limit check
-    if normalized in otp_storage:
-        last_req = otp_storage[normalized].get("last_requested_at")
-        if last_req and (now - last_req).total_seconds() < 60:
-            raise HTTPException(
-                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Too many requests. Please wait 60 seconds before requesting a new OTP."
-            )
+    if record:
+        last_req = record.get("last_requested_at")
+        if last_req:
+            # MongoDB returns naive datetimes in UTC, convert to timezone-aware UTC for subtraction
+            if last_req.tzinfo is None:
+                last_req = last_req.replace(tzinfo=timezone.utc)
+            if (now - last_req).total_seconds() < 60:
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Too many requests. Please wait 60 seconds before requesting a new OTP."
+                )
             
     otp = f"{secrets.SystemRandom().randint(100000, 999999):06d}"
     print(f"\n[OTP Dev Debug] Generated OTP '{otp}' for email: {normalized}\n")
     
-    otp_storage[normalized] = {
-        "otp": otp,
-        "created_at": now,
-        "attempts": 0,
-        "last_requested_at": now
-    }
+    await db.otps.update_one(
+        {"email": normalized},
+        {
+            "$set": {
+                "otp": otp,
+                "created_at": now,
+                "attempts": 0,
+                "last_requested_at": now
+            }
+        },
+        upsert=True
+    )
     
     # In a serverless environment (like Vercel), background tasks are not guaranteed to complete
     # because the container can be frozen immediately after returning the response.
@@ -116,17 +120,22 @@ async def verify_otp(email: str, submitted_otp: str) -> dict:
     normalized = _normalize_email(email)
     now = datetime.now(timezone.utc)
     
-    if normalized not in otp_storage:
+    db = await get_database()
+    record = await db.otps.find_one({"email": normalized})
+    
+    if not record:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No OTP requested for this email or it has expired."
         )
-        
-    record = otp_storage[normalized]
     
     # 5 minutes expiration check
-    if (now - record["created_at"]).total_seconds() > 300:
-        del otp_storage[normalized]
+    created_at = record["created_at"]
+    if created_at.tzinfo is None:
+        created_at = created_at.replace(tzinfo=timezone.utc)
+        
+    if (now - created_at).total_seconds() > 300:
+        await db.otps.delete_one({"email": normalized})
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="OTP has expired. Please request a new one."
@@ -134,16 +143,20 @@ async def verify_otp(email: str, submitted_otp: str) -> dict:
         
     # Verify code match
     if record["otp"] != submitted_otp:
-        record["attempts"] += 1
-        remaining = 3 - record["attempts"]
+        new_attempts = record.get("attempts", 0) + 1
+        remaining = 3 - new_attempts
         
         if remaining <= 0:
-            del otp_storage[normalized]
+            await db.otps.delete_one({"email": normalized})
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Maximum verification attempts exceeded. The OTP has been invalidated."
             )
         else:
+            await db.otps.update_one(
+                {"email": normalized},
+                {"$set": {"attempts": new_attempts}}
+            )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid OTP. {remaining} attempts remaining."
@@ -151,9 +164,9 @@ async def verify_otp(email: str, submitted_otp: str) -> dict:
             
     # Success workflow:
     # 1. Immediately delete from temporary storage to prevent replay attacks
-    del otp_storage[normalized]
-        # 2. Get or create the user document in MongoDB
-    db = await get_database()
+    await db.otps.delete_one({"email": normalized})
+    
+    # 2. Get or create the user document in MongoDB
     user = await db.users.find_one({"email": normalized})
     if not user:
         user_doc = {
