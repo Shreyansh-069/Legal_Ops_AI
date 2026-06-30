@@ -35,13 +35,23 @@ export function AuthProvider({ children }) {
     return verifiedUser;
   };
 
+  const signup = async (username, email, password) => {
+    return await authApi.signup(username, email, password);
+  };
+
+  const login = async (email, password) => {
+    const loggedInUser = await authApi.login(email, password);
+    setUser(loggedInUser);
+    return loggedInUser;
+  };
+
   const logout = async () => {
     await authApi.logout();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, requestOtp, verifyOtp, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, requestOtp, verifyOtp, signup, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );}

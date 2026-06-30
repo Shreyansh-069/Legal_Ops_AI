@@ -11,4 +11,16 @@ class OTPVerify(BaseModel):
 class UserResponse(BaseModel):
     id: str
     email: str
+    username: str | None = None
     email_verified: bool = False
+
+
+class RegisterRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str

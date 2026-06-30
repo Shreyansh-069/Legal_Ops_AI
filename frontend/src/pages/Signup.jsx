@@ -5,10 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
 
 export default function Signup() {
-  const { requestOtp, verifyOtp, user } = useAuth();
+  const { signup, verifyOtp, requestOtp, user } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState('email'); // 'email' or 'otp'
+  const [step, setStep] = useState('signup'); // 'signup' or 'otp'
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -26,16 +29,22 @@ export default function Signup() {
     }
   }, [cooldown]);
 
-  const handleSendOtp = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await requestOtp(email);
+      await signup(username, email, password);
       setStep('otp');
       setCooldown(60);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not request verification code. Try again.');
+      setError(err instanceof ApiError ? err.message : 'Could not register. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -76,13 +85,28 @@ export default function Signup() {
         </>
       }
     >
-      {step === 'email' ? (
-        <form onSubmit={handleSendOtp} className="space-y-4">
+      {step === 'signup' ? (
+        <form onSubmit={handleSignup} className="space-y-4">
           {error && (
             <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 animate-in fade-in">
               {error}
             </div>
           )}
+
+          <div>
+            <label htmlFor="username" className="block text-xs font-medium text-text-secondary mb-1.5">
+              Username
+            </label>
+            <input
+              id="username"
+              type="text"
+              required
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full bg-surface border border-border-light rounded-md px-3 py-2.5 text-sm text-text placeholder-text-faint focus:outline-none focus:border-brass transition-colors"
+              placeholder="legal_eagle"
+            />
+          </div>
 
           <div>
             <label htmlFor="email" className="block text-xs font-medium text-text-secondary mb-1.5">
@@ -100,12 +124,44 @@ export default function Signup() {
             />
           </div>
 
+          <div>
+            <label htmlFor="password" className="block text-xs font-medium text-text-secondary mb-1.5">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-surface border border-border-light rounded-md px-3 py-2.5 text-sm text-text placeholder-text-faint focus:outline-none focus:border-brass transition-colors"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-xs font-medium text-text-secondary mb-1.5">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              required
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full bg-surface border border-border-light rounded-md px-3 py-2.5 text-sm text-text placeholder-text-faint focus:outline-none focus:border-brass transition-colors"
+              placeholder="••••••••"
+            />
+          </div>
+
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-2.5 rounded-md bg-brass text-white text-sm font-semibold tracking-wide hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
+            className="w-full py-2.5 mt-2 rounded-md bg-brass text-white text-sm font-semibold tracking-wide hover:opacity-90 transition-opacity disabled:opacity-50 cursor-pointer"
           >
-            {submitting ? 'Sending code...' : 'Send Verification Code'}
+            {submitting ? 'Registering...' : 'Register & Verify'}
           </button>
         </form>
       ) : (
@@ -159,13 +215,13 @@ export default function Signup() {
             <button
               type="button"
               onClick={() => {
-                setStep('email');
+                setStep('signup');
                 setError('');
                 setOtp('');
               }}
               className="text-text-muted hover:text-text transition-colors cursor-pointer"
             >
-              Change email
+              Change details
             </button>
           </div>
         </form>
