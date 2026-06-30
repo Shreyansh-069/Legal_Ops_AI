@@ -10,9 +10,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pymongo.errors import ServerSelectionTimeoutError
+from pymongo.errors import PyMongoError, ServerSelectionTimeoutError
 
 from agents.legal_finder import initialize_vector_db
 from auth.router import router as auth_router
@@ -30,6 +31,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(ServerSelectionTimeoutError)
+async def server_selection_timeout_handler(request: Request, exc: ServerSelectionTimeoutError):
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": "Database connection timeout. If you are running on Vercel, please make sure you have whitelisted 0.0.0.0/0 (Allow Access from Anywhere) in your MongoDB Atlas Network Access console."
+        }
+    )
+
+
+@app.exception_handler(PyMongoError)
+async def pymongo_exception_handler(request: Request, exc: PyMongoError):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": f"Database connection/operation failed: {str(exc)}"
+        }
+    )
+
 
 app.include_router(auth_router)
 app.include_router(chat_router)
