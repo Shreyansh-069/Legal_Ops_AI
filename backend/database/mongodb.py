@@ -21,7 +21,13 @@ async def connect_to_mongo() -> None:
     uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
     db_name = os.getenv("MONGODB_DB_NAME", "legal_ops_ai")
 
-    _client = AsyncIOMotorClient(uri, serverSelectionTimeoutMS=5000)
+    # Use certifi's CA bundle for TLS/SSL certificate verification on remote connections
+    import certifi
+    kwargs = {"serverSelectionTimeoutMS": 5000}
+    if "mongodb+srv://" in uri or "ssl=true" in uri.lower() or "tls=true" in uri.lower():
+        kwargs["tlsCAFile"] = certifi.where()
+
+    _client = AsyncIOMotorClient(uri, **kwargs)
     _db = _client[db_name]
 
     try:
