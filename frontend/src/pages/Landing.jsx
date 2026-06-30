@@ -13,7 +13,7 @@ export default function Landing() {
   const [showMakers, setShowMakers] = useState(false);
 
   return (
-    <div className="min-h-screen bg-bg text-text transition-colors duration-300 flex flex-col font-sans select-none overflow-y-auto">
+    <div className="h-full bg-bg text-text transition-colors duration-300 flex flex-col font-sans select-none overflow-y-auto">
       {/* Navigation Top Bar */}
       <header className="h-16 w-full bg-surface-raised/80 backdrop-blur-md border-b border-border-light flex items-center justify-between px-6 md:px-12 sticky top-0 z-40 transition-colors duration-300">
         <div className="flex items-center gap-3">

@@ -45,6 +45,24 @@ export default function ChatApp() {
   const [conversations, setConversations] = useState([]);
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [clearingHistory, setClearingHistory] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768;
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const loadConversations = useCallback(async () => {
     setLoadingConversations(true);
@@ -215,20 +233,58 @@ export default function ChatApp() {
   }
 
   return (
-    <div className="flex w-screen h-screen bg-bg overflow-hidden font-sans">
-      <Sidebar
-        conversations={conversations}
-        activeConversationId={conversationId}
-        loadingConversations={loadingConversations}
-        onSelectConversation={handleSelectConversation}
-        onNewChat={handleNewChat}
-        onResetLanguage={handleResetLanguage}
-        onClearHistory={handleClearHistory}
-        clearingHistory={clearingHistory}
-      />
+    <div className="flex w-screen h-screen bg-bg overflow-hidden font-sans relative">
+      {/* Sidebar container */}
+      <div
+        className={`fixed md:relative inset-y-0 left-0 z-30 h-full w-72 overflow-hidden transition-all duration-300 ease-in-out ${
+          sidebarOpen ? 'translate-x-0 md:w-72' : '-translate-x-full md:translate-x-0 md:w-0'
+        }`}
+      >
+        <Sidebar
+          conversations={conversations}
+          activeConversationId={conversationId}
+          loadingConversations={loadingConversations}
+          onSelectConversation={(id) => {
+            handleSelectConversation(id);
+            if (window.innerWidth < 768) {
+              setSidebarOpen(false);
+            }
+          }}
+          onNewChat={() => {
+            handleNewChat();
+            if (window.innerWidth < 768) {
+              setSidebarOpen(false);
+            }
+          }}
+          onResetLanguage={() => {
+            handleResetLanguage();
+            if (window.innerWidth < 768) {
+              setSidebarOpen(false);
+            }
+          }}
+          onClearHistory={handleClearHistory}
+          clearingHistory={clearingHistory}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </div>
 
+      {/* Backdrop overlay for mobile when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/40 z-20 md:hidden animate-in fade-in"
+        />
+      )}
+
+      {/* Main content area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <Navbar language={language} user={user} onLogout={handleLogout} />
+        <Navbar
+          language={language}
+          user={user}
+          onLogout={handleLogout}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        />
 
         <ChatWindow messages={messages} isLoading={isLoading} />
 
