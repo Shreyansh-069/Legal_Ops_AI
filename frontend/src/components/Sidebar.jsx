@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquarePlus, Trash2, Sun, Moon, Scale } from 'lucide-react';
+import { MessageSquarePlus, Trash2, Sun, Moon, Scale, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 function formatDate(dateString) {
@@ -27,6 +27,7 @@ export default function Sidebar({
   onResetLanguage,
   onClearHistory,
   clearingHistory,
+  onClose,
 }) {
   const { theme, toggleTheme } = useTheme();
   const [confirmClear, setConfirmClear] = useState(false);
@@ -42,8 +43,8 @@ export default function Sidebar({
 
   return (
     <aside className="w-72 h-full bg-surface-sidebar flex flex-col border-r border-sidebar-border select-none font-sans">
-      <div className="p-5 border-b border-sidebar-border">
-        <div className="flex items-center gap-3 mb-1">
+      <div className="p-5 border-b border-sidebar-border flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-md bg-sidebar-active border border-sidebar-border flex items-center justify-center">
             <Scale size={16} className="text-brass-muted" />
           </div>
@@ -56,6 +57,16 @@ export default function Sidebar({
             </p>
           </div>
         </div>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden p-1.5 rounded-md text-sidebar-text-muted hover:text-sidebar-text hover:bg-sidebar-hover transition-colors cursor-pointer"
+            aria-label="Close Sidebar"
+          >
+            <X size={15} />
+          </button>
+        )}
       </div>
 
       <div className="p-3 border-b border-sidebar-border">
