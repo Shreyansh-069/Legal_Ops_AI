@@ -1,43 +1,68 @@
-# LegalOpsAI
+# ⚖️ LegalOpsAI
 
-LegalOpsAI is a chat assistant designed to help with Indian legal queries. It lets users ask questions, search through local statutory PDF files (like the Constitution of India, the Indian Penal Code, or the new Bharatiya Nyaya Sanhita), and find recent Supreme Court judgments online. The assistant also automatically detects the user's language and translates replies back to them (supporting Hindi, Tamil, Telugu, Kannada, Malayalam, and English).
+**An AI-powered chat assistant for Indian legal queries** — search statutory PDFs, pull recent Supreme Court judgments, and get answers in your own language.
 
----
+🔗 **Live Demo:** [legal-ops-ai-gules.vercel.app](https://legal-ops-ai-gules.vercel.app/)
 
-## What It Does (Core Features)
-
-*   **Smart Legal Search (RAG):** Automatically searches through legal PDF manuals stored in the backend folder using semantic search.
-*   **Web Judgment Lookup:** Automatically searches the web using Tavily to find relevant Indian Supreme Court case precedents.
-*   **Indian Law Guardrails:** The assistant checks if your question is related to Indian laws or court procedures. If you ask something completely unrelated (like sports or pop culture), it politely declines to answer.
-*   **Multi-language Support:** Automatically detects the language you ask in and translates the final answer back to that language.
-*   **Email OTP Logins:** A simple, passwordless sign-in flow that sends verification codes to your email.
-*   **Persistent Chats:** Saves your conversations and messages to MongoDB so you can log back in and resume where you left off.
-*   **Theme Switcher:** Clean dark and light modes.
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-database-47A248?logo=mongodb&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ---
 
-## Technical Stack
+## 📖 Table of Contents
+
+- [What It Does](#-what-it-does-core-features)
+- [Tech Stack](#-technical-stack)
+- [How It Works](#-how-it-works-under-the-hood)
+- [Folder Structure](#-folder-structure)
+- [Getting Started](#-getting-started)
+- [Testing](#-testing-smtp--authentication)
+
+---
+
+## 🚀 What It Does (Core Features)
+
+| Feature | Description |
+|---|---|
+| 🔍 **Smart Legal Search (RAG)** | Semantically searches legal PDFs (Constitution, IPC, BNS, etc.) stored in the backend. |
+| 🌐 **Web Judgment Lookup** | Uses Tavily to find relevant Indian Supreme Court precedents in real time. |
+| 🛡️ **Indian Law Guardrails** | Politely declines questions unrelated to Indian law (e.g. sports, pop culture). |
+| 🗣️ **Multi-language Support** | Auto-detects your query language and replies in it — Hindi, Tamil, Telugu, Kannada, Malayalam, or English. |
+| 📧 **Email OTP Login** | Simple, passwordless sign-in via emailed verification codes. |
+| 💾 **Persistent Chats** | Conversations are saved to MongoDB so you can pick up where you left off. |
+| 🌗 **Theme Switcher** | Clean dark and light modes. |
+
+---
+
+## 🛠 Technical Stack
 
 ### Backend
-*   **FastAPI:** Serves the backend API.
-*   **LangGraph & LangChain:** Manages the logical flow of the AI assistant (language detection -> search -> answer generation -> translation).
-*   **ChromaDB:** A local vector database used to index and search through the legal PDF documents.
-*   **SentenceTransformers (`all-MiniLM-L6-v2`):** Generates embeddings for local documents.
-*   **Motor & Pymongo:** Connects asynchronously to MongoDB.
-*   **Google Gemini API:** Powers the main reasoning and translation steps.
-*   **Tavily API:** Runs live web searches for legal precedents.
+| Tool | Purpose |
+|---|---|
+| **FastAPI** | Serves the backend API |
+| **LangGraph & LangChain** | Orchestrates the AI workflow (language detection → search → answer → translation) |
+| **ChromaDB** | Local vector database for indexing and searching legal PDFs |
+| **SentenceTransformers** (`all-MiniLM-L6-v2`) | Generates embeddings for local documents |
+| **Motor & Pymongo** | Async MongoDB connectivity |
+| **Google Gemini API** | Powers reasoning and translation |
+| **Tavily API** | Live web search for legal precedents |
 
 ### Frontend
-*   **React 19 & Vite:** A fast frontend build system.
-*   **Tailwind CSS (v4):** Used for styles.
-*   **Lucide Icons:** Icons for the navigation bar and buttons.
-*   **React Router Dom:** Handles navigation between the landing page, login page, and chat application.
+| Tool | Purpose |
+|---|---|
+| **React 19 & Vite** | Fast frontend build system |
+| **Tailwind CSS v4** | Styling |
+| **Lucide Icons** | Icons for nav bar and buttons |
+| **React Router Dom** | Navigation between landing, login, and chat pages |
 
 ---
 
-## How it Works Under the Hood
+## 🧠 How It Works Under the Hood
 
-When you send a message, the backend runs a **LangGraph workflow** with these steps:
+Every message runs through a **LangGraph workflow**:
 
 ```mermaid
 graph TD
@@ -50,16 +75,16 @@ graph TD
     Localization --> End([Final Response to User])
 ```
 
-1.  **Router:** Detects what language the query is written in.
-2.  **Document Finder & Web Search (In Parallel):**
-    *   *Document Finder* retrieves relevant sections from the PDFs in `backend/data/`.
-    *   *Web Search* searches Google/Tavily for Supreme Court precedents.
-3.  **Synthesis:** Combines the text from your local PDFs and the web. Gemini reads this context and answers. If the query isn't about law, a guardrail triggers and the assistant refuses to answer.
-4.  **Localization:** Translates the answer back to your language if you didn't write the query in English.
+1. **Router** — Detects the language of the incoming query.
+2. **Document Finder & Web Search** *(run in parallel)*
+   - *Document Finder* retrieves relevant sections from PDFs in `backend/data/`.
+   - *Web Search* looks up Supreme Court precedents via Tavily.
+3. **Synthesis** — Gemini combines local + web context to answer. If the query isn't law-related, a guardrail refuses to answer.
+4. **Localization** — Translates the final answer back into the user's original language, if needed.
 
 ---
 
-## Folder Structure
+## 📁 Folder Structure
 
 ```text
 ├── backend/
@@ -85,105 +110,116 @@ graph TD
 
 ---
 
-## Getting Started
+## 🏁 Getting Started
 
 ### Prerequisites
-Make sure you have these installed on your computer:
-*   [Python 3.10+](https://www.python.org/downloads/)
-*   [Node.js](https://nodejs.org/)
-*   [Docker](https://www.docker.com/products/docker-desktop/) (to run MongoDB locally)
+Make sure you have these installed:
+- [Python 3.10+](https://www.python.org/downloads/)
+- [Node.js](https://nodejs.org/)
+- [Docker](https://www.docker.com/products/docker-desktop/) (to run MongoDB locally)
 
 ---
 
-### Step 1: Start MongoDB
-In the root folder of this project, run this command in your terminal to start MongoDB:
+### Step 1 — Start MongoDB
+
+From the project root:
+
 ```bash
 docker compose up -d
 ```
-*This starts a MongoDB container on port `27017` and keeps your database data inside a local volume.*
+
+This starts a MongoDB container on port `27017`, with data persisted in a local volume.
 
 ---
 
-### Step 2: Set Up the Backend
+### Step 2 — Set Up the Backend
 
-1.  Open your terminal and navigate to the backend folder:
-    ```bash
-    cd backend
-    ```
-2.  Create a copy of `.env.example` and name it `.env`:
-    *   On Windows (PowerShell):
-        ```powershell
-        cp .env.example .env
-        ```
-    *   On macOS/Linux:
-        ```bash
-        cp .env.example .env
-        ```
-3.  Open the newly created `.env` file and fill in your keys:
-    *   `GOOGLE_API_KEY`: Your Gemini API key from Google AI Studio.
-    *   `TAVILY_API_KEY`: Your search API key from Tavily.
-    *   `MAIL_USERNAME` and `MAIL_PASSWORD`: Your SMTP email credentials (like a Gmail App Password) to send verification OTP emails.
-4.  Create a Python virtual environment:
-    ```bash
-    python -m venv venv
-    ```
-5.  Activate the virtual environment:
-    *   On Windows (PowerShell):
-        ```powershell
-        .\venv\Scripts\Activate.ps1
-        ```
-    *   On macOS/Linux:
-        ```bash
-        source venv/bin/activate
-        ```
-6.  Install the required packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
-7.  **Initialize the Vector Database:**
-    Before launching the API server, run `main.py` directly once. This will read the PDF files inside the `backend/data/` folder and index them into a new folder called `chroma_db_or_index/`:
-    ```bash
-    python main.py
-    ```
-8.  Start the FastAPI server:
-    ```bash
-    uvicorn main:app --reload
-    ```
-    *The API will run on `http://localhost:8000`.*
+```bash
+cd backend
+```
 
----
+Create your `.env` file from the example:
 
-### Step 3: Set Up the Frontend
+```bash
+# macOS/Linux
+cp .env.example .env
 
-1.  Open a new terminal window and navigate to the frontend folder:
-    ```bash
-    cd frontend
-    ```
-2.  Install the packages:
-    ```bash
-    npm install
-    ```
-3.  Start the Vite development server:
-    ```bash
-    npm run dev
-    ```
-4.  Open `http://localhost:5173` in your web browser.
+# Windows (PowerShell)
+cp .env.example .env
+```
+
+Fill in the following keys inside `.env`:
+
+| Key | Description |
+|---|---|
+| `GOOGLE_API_KEY` | Your Gemini API key from Google AI Studio |
+| `TAVILY_API_KEY` | Your search API key from Tavily |
+| `MAIL_USERNAME` / `MAIL_PASSWORD` | SMTP credentials (e.g. a Gmail App Password) for sending OTP emails |
+
+Create and activate a virtual environment:
+
+```bash
+python -m venv venv
+
+# macOS/Linux
+source venv/bin/activate
+
+# Windows (PowerShell)
+.\venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+**Initialize the vector database** — run once before starting the server. This reads the PDFs in `backend/data/` and indexes them into `chroma_db_or_index/`:
+
+```bash
+python main.py
+```
+
+Start the API server:
+
+```bash
+uvicorn main:app --reload
+```
+
+> The API will run at `http://localhost:8000`
 
 ---
 
-## Testing SMTP & Authentication
+### Step 3 — Set Up the Frontend
 
-If you need to test your settings, we've included two scripts inside `backend/scripts/`:
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-*   **Test SMTP Email sending:**
-    Runs a test to ensure your SMTP server settings in `.env` are working.
-    ```bash
-    # From the backend directory with venv active
-    python scripts/test_email_config.py
-    ```
-*   **Test Auth endpoints:**
-    Starts a quick API smoke test for authentication and chat lists.
-    ```bash
-    # From the backend directory with venv active
-    python scripts/test_auth.py
-    ```
+Then open **http://localhost:5173** in your browser.
+
+---
+
+## 🧪 Testing SMTP & Authentication
+
+Two helper scripts live in `backend/scripts/` (run from `backend/` with the venv active):
+
+```bash
+# Test SMTP email sending
+python scripts/test_email_config.py
+
+# Smoke-test auth + chat endpoints
+python scripts/test_auth.py
+```
+
+---
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome! If you spot a bug or have a feature idea, feel free to open an issue.
+
+## 📄 License
+
+This project is licensed under the MIT License — see the `LICENSE` file for details.
