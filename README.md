@@ -84,7 +84,7 @@ graph TD
 
 ---
 
-## 📁 Folder Structure
+## 📁 Project Structure 
 
 ```text
 ├── backend/
